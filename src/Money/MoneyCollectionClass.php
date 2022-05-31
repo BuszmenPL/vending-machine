@@ -3,6 +3,7 @@
 namespace VendingMachine\Money;
 
 require_once 'MoneyCollectionInterface.php';
+require_once 'MoneyInterface.php';
 
 class MoneyCollection implements MoneyCollectionInterface
 {

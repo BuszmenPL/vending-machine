@@ -18,9 +18,11 @@ use VendingMachine\Action\Action;
 class InputHandler implements InputHandlerInterface
 {
     private MoneyCollection $collection;
+    private array $items;
 
-    public function __construct() {
+    public function __construct(array $i) {
         $this->collection = new MoneyCollection();
+        $this->items = $i;
     }
 
     /**
@@ -38,13 +40,13 @@ class InputHandler implements InputHandlerInterface
                 echo "Current balance: " . $this->collection->sum() . $this->moneyToString() . "\n";
             }
             elseif($this->check($commend))
-                return new Input(new Action($commend), $this->collection);
+                return new Input(new Action($commend, $this->items), $this->collection);
             else
                 throw new InvalidInputException("Invalid Input", 1);
         }
     }
 
-    private function getValue(string $s) {
+    private function getValue(string $s): float {
         $value  = 0.0;
 
         switch($s) {
@@ -57,7 +59,7 @@ class InputHandler implements InputHandlerInterface
         return $value;
     }
 
-    private function check(string $s) {
+    private function check(string $s): bool {
         if($s == 'RETURN-MONEY')
             return true;
         else {
@@ -66,7 +68,7 @@ class InputHandler implements InputHandlerInterface
         }
     }
 
-    private function moneyToString() {
+    private function moneyToString(): string {
         $tab = array();
 
         foreach($this->collection->toArray() as $value)

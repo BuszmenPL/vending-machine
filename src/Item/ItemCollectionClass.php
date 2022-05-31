@@ -2,7 +2,10 @@
 
 namespace VendingMachine\Item;
 
+require_once __DIR__.'/../ItemNotFoundException.php';
 require_once 'ItemCollectionInterface.php';
+require_once 'ItemInterface.php';
+require_once 'ItemCodeInterface.php';
 
 use VendingMachine\Exception\ItemNotFoundException;
 
@@ -22,16 +25,16 @@ class ItemCollection implements ItemCollectionInterface
      * @throws ItemNotFoundException
      */
     public function get(ItemCodeInterface $itemCode): ItemInterface {
-        foreach($this->collection as $value)
-            if($value->getCode() == $itemCode)
-                return $value;
+        $index = $this->findItem($itemCode);
+        $value = clone $this->collection[$index];
+        unset($this->collection[$index]);
 
-        throw new ItemNotFoundException("Item Not Found", 1);
+        return $value;
     }
 
     public function count(ItemCodeInterface $itemCode): int {
         try {
-            $value = $this->get($itemCode);
+            $value = $this->collection[$this->findItem($itemCode)];
             return $value->getCount();
         }
         catch(ItemNotFoundException $e) {
@@ -41,5 +44,18 @@ class ItemCollection implements ItemCollectionInterface
 
     public function empty(): void {
         $this->collection = array();
+    }
+
+    private function findItem(ItemCodeInterface $itemCode): int {
+        $i = 0;
+        $n = count($this->collection);
+
+        while(($i != $n) && ($this->collection[$i]->getCode() != $itemCode))
+            $i++;
+
+        if($i == $n)
+            throw new ItemNotFoundException("Item Not Found", 1);
+
+        return $i;
     }
 }
