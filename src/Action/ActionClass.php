@@ -39,7 +39,7 @@ class Action implements ActionInterface
             $itemPrice = $this->getItemPrice();
             $itemCode = $this->getItemCode();
 
-            if($itemPrice == $transactionsSum) {
+            if($itemPrice == $transactionsSum || $itemPrice == 0.0) {
                 $vendingMachine->dropItem($itemCode);
                 return new Response($itemCode);
             }
@@ -64,6 +64,8 @@ class Action implements ActionInterface
         foreach($this->items as $value)
             if($value->getCode() == $code)
                 return $value->getPrice();
+
+        return 0.0;
     }
 
     private function moneyToString(MoneyCollectionInterface $money): string {
