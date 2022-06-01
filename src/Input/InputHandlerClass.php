@@ -8,21 +8,26 @@ require_once __DIR__.'/../Money/MoneyCollectionClass.php';
 require_once __DIR__.'/../Money/MoneyClass.php';
 require_once __DIR__.'/../Input/InputClass.php';
 require_once __DIR__.'/../Action/ActionClass.php';
+require_once __DIR__.'/../VendingMachineInterface.php';
 
 use VendingMachine\Exception\InvalidInputException;
+use VendingMachine\Money\MoneyCollectionInterface;
 use VendingMachine\Money\MoneyCollection;
 use VendingMachine\Money\Money;
 use VendingMachine\Input\Input;
 use VendingMachine\Action\Action;
+use VendingMachine\VendingMachineInterface;
 
 class InputHandler implements InputHandlerInterface
 {
     private MoneyCollection $collection;
     private array $items;
+    private VendingMachineInterface $handler;
 
-    public function __construct(array $i) {
+    public function __construct(array $i, VendingMachineInterface $h) {
         $this->collection = new MoneyCollection();
         $this->items = $i;
+        $this->handler = $h;
     }
 
     /**
@@ -37,7 +42,7 @@ class InputHandler implements InputHandlerInterface
 
             if($value != 0.0) {
                 $this->collection->add(new Money($value, $commend));
-                echo "Current balance: " . $this->collection->sum() . $this->moneyToString() . "\n";
+                echo "Current balance: " . $this->sumMoney() . $this->moneyToString() . "\n";
             }
             elseif($this->check($commend))
                 return new Input(new Action($commend, $this->items), $this->collection);
@@ -71,9 +76,17 @@ class InputHandler implements InputHandlerInterface
     private function moneyToString(): string {
         $tab = array();
 
+        foreach($this->handler->getCurrentTransactionMoney()->toArray() as $value)
+            $tab[] = $value->getCode();
+
         foreach($this->collection->toArray() as $value)
             $tab[] = $value->getCode();
 
         return " (" . implode(", ", $tab) . ")";
+    }
+
+    private function sumMoney(): string {
+        $sum = $this->collection->sum() + $this->handler->getCurrentTransactionMoney()->sum();
+        return number_format($sum, 2);
     }
 }

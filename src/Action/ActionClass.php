@@ -5,12 +5,14 @@ namespace VendingMachine\Action;
 require_once __DIR__.'/../VendingMachineInterface.php';
 require_once __DIR__.'/../Response/ResponseClass.php';
 require_once __DIR__.'/../Item/ItemCodeClass.php';
+require_once __DIR__.'/../Money/MoneyCollectionInterface.php';
 
 use VendingMachine\VendingMachineInterface;
 use VendingMachine\Response\ResponseInterface;
 use VendingMachine\Response\Response;
 use VendingMachine\Exception\ItemNotFoundException;
 use VendingMachine\Item\ItemCode;
+use VendingMachine\Money\MoneyCollectionInterface;
 
 class Action implements ActionInterface
 {
@@ -28,8 +30,8 @@ class Action implements ActionInterface
 
     public function handle(VendingMachineInterface $vendingMachine): ResponseInterface {
         if($this->name == "RETURN-MONEY") {
-            $money = $vendingMachine->getInsertedMoney()->toArray();
-            return new Response(implode(", ", $money));
+            $money = $this->moneyToString($vendingMachine->getInsertedMoney());
+            return new Response($money);
         }
 
         try {
@@ -42,7 +44,7 @@ class Action implements ActionInterface
                 return new Response($itemCode);
             }
             else
-                return new Response("Item \"" . $itemCode . "\" costs " . $itemPrice);
+                return new Response("Item \"" . $itemCode . "\" costs " . number_format($itemPrice, 2));
 
         }
         catch(ItemNotFoundException $e) {
@@ -51,7 +53,7 @@ class Action implements ActionInterface
     }
 
     private function getItemCode(): ItemCode {
-        $tab = explode("-", $name);
+        $tab = explode("-", $this->name);
 
         return new ItemCode($tab[1]);
     }
@@ -60,7 +62,16 @@ class Action implements ActionInterface
         $code = $this->getItemCode();
 
         foreach($this->items as $value)
-            if($value->getCode == $code)
+            if($value->getCode() == $code)
                 return $value->getPrice();
+    }
+
+    private function moneyToString(MoneyCollectionInterface $money): string {
+        $tab = array();
+
+        foreach($money->toArray() as $value)
+            $tab[] = $value->getCode();
+
+        return implode(", ", $tab);
     }
 }

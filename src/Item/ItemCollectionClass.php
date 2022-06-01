@@ -2,7 +2,7 @@
 
 namespace VendingMachine\Item;
 
-require_once __DIR__.'/../ItemNotFoundException.php';
+require_once __DIR__.'/../Exception/ItemNotFoundException.php';
 require_once 'ItemCollectionInterface.php';
 require_once 'ItemInterface.php';
 require_once 'ItemCodeInterface.php';
@@ -28,6 +28,8 @@ class ItemCollection implements ItemCollectionInterface
         $index = $this->findItem($itemCode);
         $value = clone $this->collection[$index];
         unset($this->collection[$index]);
+
+        $this->redefinitionIndex();
 
         return $value;
     }
@@ -57,5 +59,14 @@ class ItemCollection implements ItemCollectionInterface
             throw new ItemNotFoundException("Item Not Found", 1);
 
         return $i;
+    }
+
+    private function redefinitionIndex(): void {
+        $new_array = array();
+        
+        foreach($this->collection as $value)
+            $new_array[] = $value;
+
+        $this->collection = $new_array;
     }
 }

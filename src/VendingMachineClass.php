@@ -2,12 +2,15 @@
 
 namespace VendingMachine;
 
-require_once __DIR__.'/../Item/ItemCollectionClass.php';
-require_once __DIR__.'/../Money/MoneyCollectionClass.php';
+require_once 'VendingMachineInterface.php';
+require_once __DIR__.'/Item/ItemCollectionClass.php';
+require_once __DIR__.'/Item/ItemClass.php';
+require_once __DIR__.'/Money/MoneyCollectionClass.php';
 
 use VendingMachine\Item\ItemCodeInterface;
 use VendingMachine\Item\ItemInterface;
 use VendingMachine\Item\ItemCollection;
+use VendingMachine\Item\Item;
 use VendingMachine\Money\MoneyCollectionInterface;
 use VendingMachine\Money\MoneyInterface;
 use VendingMachine\Money\MoneyCollection;
@@ -32,7 +35,7 @@ class VendingMachine implements VendingMachineInterface
         $n = $item->getCount() - 1;
 
         if($n > 0)
-            $this->add(new Item($item->getPrice(), $n, $item->getCode()));
+            $this->addItem(new Item($item->getPrice(), $n, $item->getCode()));
 
         $this->moneys->empty();
     }
